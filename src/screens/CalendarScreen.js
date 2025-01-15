@@ -39,24 +39,39 @@ export default function CalendarScreen({ navigation }) {
             return;
         }
 
-        setAnnotations((prevAnnotations) => ({
-            ...prevAnnotations,
-            [selectedDate]: {
-                marked: true,
-                dots: [{ color: "purple" }],
-                annotations: [
-                    ...(prevAnnotations[selectedDate]?.annotations || []),
-                    {
-                        cause: selectedCause,
-                        stressLevel,
-                        timeRange: `${startTime.getHours()}:${startTime.getMinutes()} - ${endTime.getHours()}:${endTime.getMinutes()}`,
-                    },
-                ],
-            },
-        }));
+        const newAnnotation = {
+            id: new Date().getTime(),
+            cause: selectedCause,
+            stressLevel,
+            timeRange: `${startTime.getHours()}:${startTime.getMinutes()} - ${endTime.getHours()}:${endTime.getMinutes()}`,
+            color: colors[stressLevel],  // Cor associada ao stressLevel
+        };
+
+        // Atualiza as anotações
+        setAnnotations((prevAnnotations) => {
+            const existingAnnotations = prevAnnotations[selectedDate]?.annotations || [];
+            const allAnnotations = [...existingAnnotations, newAnnotation];
+
+            // Encontra o maior nível de estresse entre todas as anotações
+            const maxStressLevel = Math.max(...allAnnotations.map((annotation) => annotation.stressLevel));
+            const maxStressColor = colors[maxStressLevel];
+
+            // Define o dot do maior grau de estresse
+            return {
+                ...prevAnnotations,
+                [selectedDate]: {
+                    marked: true,
+                    dots: [{ color: maxStressColor }],
+                    annotations: allAnnotations,
+                },
+            };
+        });
+
         setModalVisible(false);
         resetModalState();
     };
+
+
 
 
     const resetModalState = () => {
