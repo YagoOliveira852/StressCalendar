@@ -192,15 +192,15 @@ const styles = StyleSheet.create({
         width: 120,
         height: 60,
     },
-    cancelButton: {
-        backgroundColor: "#ff0021",
-        marginVertical: 5,
-        borderRadius: 20
-    },
     saveButton: {
         backgroundColor: "#5cdb5c",
         marginVertical: 5,
         borderRadius: 20
+    },
+    cancelButton: {
+        backgroundColor: "#db3b4d",
+        marginVertical: 5,
+        borderRadius: 20,
     },
     modalButtons: {
         marginTop: 20,

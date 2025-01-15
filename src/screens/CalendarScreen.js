@@ -5,7 +5,8 @@ import CalendarComponent from '../components/CalendarComponent';
 import AnnotationModal from '../components/AnnotationModal';
 import AnnotationList from '../components/AnnotationList';
 
-export default function CalendarScreen() {
+
+export default function CalendarScreen({ navigation }) {
     const [selectedDate, setSelectedDate] = useState('');
     const [annotations, setAnnotations] = useState({});
     const [modalVisible, setModalVisible] = useState(false);
@@ -21,9 +22,10 @@ export default function CalendarScreen() {
 
     useEffect(() => {
         const today = new Date();
-        const todayString = today.toISOString().split('T')[0]; // Formato "YYYY-MM-DD"
+        const todayString = today.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }).split('/').reverse().join('-'); // Formato "YYYY-MM-DD"
         setSelectedDate(todayString);
     }, []);
+
 
     const handleDayPress = (day) => {
         setSelectedDate(day.dateString);
@@ -74,7 +76,9 @@ export default function CalendarScreen() {
 
             <AnnotationList annotations={annotations[selectedDate]?.annotations || []} selectedDate={selectedDate} />
 
-            <Button buttonStyle={styles.addAnnotation} title="Adicionar Anotação" onPress={openModal} />
+            <View style={styles.addAnnotationContainer}>
+                <Button buttonStyle={styles.addAnnotation} titleStyle={styles.addAnnotationText} title="Adicionar Anotação" onPress={openModal} />
+            </View>
 
             <AnnotationModal
                 modalVisible={modalVisible}
@@ -101,10 +105,18 @@ export default function CalendarScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 16,
         backgroundColor: '#f9f9f9',
     },
-    addAnnotation: {
-        borderRadius: 10,
+    addAnnotationContainer: {
+        marginBottom: 14,
+        marginTop: 5,
+        alignItems: 'center',
+
     },
+    addAnnotation: {
+        borderRadius: 20,
+        paddingVertical: 10,
+        paddingHorizontal: 70,
+    },
+
 });

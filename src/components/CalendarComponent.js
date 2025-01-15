@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Dimensions } from 'react-native';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
+import { Ionicons } from '@expo/vector-icons';
 
 LocaleConfig.locales['pt-br'] = {
     monthNames: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'],
@@ -31,11 +32,25 @@ export default function CalendarComponent({
                 }, {}),
                 [selectedDate]: {
                     selected: true,
-                    // selectedColor: 'lightblue',
                 },
             }}
             markingType={'multi-dot'}
             style={styles.calendar}
+            theme={{
+                monthTextColor: 'black',
+                monthTextSize: 20,
+                todayTextColor: 'blue',
+                textDayFontWeight: 'normal',
+                textDayFontSize: 16,
+                textMonthFontSize: 20,
+            }}
+            renderArrow={(direction) => (
+                <Ionicons
+                    name={direction === 'left' ? 'arrow-back' : 'arrow-forward'}
+                    size={30}
+                    color="#1684E1"
+                />
+            )}
         />
     );
 }
@@ -44,9 +59,7 @@ const styles = StyleSheet.create({
     calendar: {
         width: Dimensions.get("window").width,
         alignSelf: "center",
-        padding: 16,
-        marginTop: 16,
-        marginBottom: 16,
+        paddingBottom: 16,
+        marginBottom: 8,
     },
-
 });
