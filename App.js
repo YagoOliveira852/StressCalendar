@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import CalendarScreen from "./src/screens/CalendarScreen";
+import AnnotationsScreen from "./src/screens/AnnotationScreen";
 
 import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createStackNavigator } from '@react-navigation/stack';
 import { View, Text, Button, StyleSheet } from 'react-native';
-
 
 function SettingsScreen({ navigation }) {
 	return (
@@ -53,6 +53,7 @@ export default function App() {
 				}}
 			>
 				<Drawer.Screen name="Calendario" component={StackNavigator} />
+				<Drawer.Screen name="Anotações" component={AnnotationsScreen} />
 				<Drawer.Screen name="Settings" component={SettingsScreen} />
 			</Drawer.Navigator>
 		</NavigationContainer>
