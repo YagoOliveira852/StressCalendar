@@ -16,21 +16,15 @@ export default function CalendarComponent({
     annotations,
     selectedDate,
     handleDayPress,
+    markedDates,
 }) {
     return (
         <Calendar
             onDayPress={handleDayPress}
             markedDates={{
-                ...Object.keys(annotations || {}).reduce((acc, date) => {
-                    if (annotations[date]) {
-                        acc[date] = {
-                            marked: true,
-                            dots: annotations[date].dots || [],
-                        };
-                    }
-                    return acc;
-                }, {}),
+                ...markedDates,
                 [selectedDate]: {
+                    ...(markedDates[selectedDate] || {}),
                     selected: true,
                 },
             }}

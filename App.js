@@ -26,6 +26,7 @@ function StackNavigator() {
 			}}
 		>
 			<Stack.Screen name="Home" component={CalendarScreen} />
+			<Stack.Screen name="Anotações" component={AnnotationsScreen} />
 			<Stack.Screen name="Settings" component={SettingsScreen} />
 		</Stack.Navigator>
 	);

@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Modal, StyleSheet, ScrollView, FlatList, Dimensions } from 'react-native';
+import { View, StyleSheet, Alert } from 'react-native';
 import { Button } from 'react-native-elements';
 import CalendarComponent from '../components/CalendarComponent';
 import AnnotationModal from '../components/AnnotationModal';
 import AnnotationList from '../components/AnnotationList';
+import { fetchAllAnnotations, fetchAnnotationsByDate, saveAnnotation } from '../services/api';
 
-
-export default function CalendarScreen({ navigation }) {
+export default function CalendarScreen() {
     const [selectedDate, setSelectedDate] = useState('');
-    const [annotations, setAnnotations] = useState({});
+    const [calendarMarks, setCalendarMarks] = useState({});
+    const [annotations, setAnnotations] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedCause, setSelectedCause] = useState('');
     const [stressLevel, setStressLevel] = useState(0);
@@ -17,68 +18,130 @@ export default function CalendarScreen({ navigation }) {
     const [showStartTimePicker, setShowStartTimePicker] = useState(false);
     const [showEndTimePicker, setShowEndTimePicker] = useState(false);
 
+
     const colors = ['green', 'lime', 'orange', 'red', 'maroon'];
-    const getColorForLevel = (level) => colors[level] || 'grey';
 
     useEffect(() => {
         const today = new Date();
         const todayString = today.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }).split('/').reverse().join('-'); // Formato "YYYY-MM-DD"
         setSelectedDate(todayString);
+        fetchAnnotations(todayString);
+        fetchMarks();
     }, []);
+
+    const fetchMarks = async () => {
+        try {
+            const data = await fetchAllAnnotations();
+
+            if (!data || data.length === 0) {
+                console.warn("Nenhuma anotação encontrada.");
+                setCalendarMarks({});
+                setAnnotations([]);
+                return;
+            }
+
+            const marks = {};
+
+            data.forEach((item) => {
+
+                const stressLevel = item.stressLevel;
+                // Validações para evitar campos undefined
+                if (!item.date || !item.startTime || !item.endTime) {
+                    console.warn("Anotação inválida encontrada:", item);
+                    return; // Ignora anotações inválidas
+                }
+
+                // Calcular o maior nível de estresse para a data
+                if (!marks[item.date] || stressLevel > marks[item.date].maxStressLevel) {
+                    marks[item.date] = {
+                        maxStressLevel: stressLevel,
+                        dots: [{ color: colors[stressLevel] || 'grey' }], // Apenas o maior nível de estresse
+                    };
+                }
+            });
+
+            const finalMarks = marks;
+            setCalendarMarks(finalMarks);
+
+        } catch (error) {
+            console.error(error);
+            setAnnotations([]);
+            Alert.alert('Erro', 'Não foi possível carregar as anotações.');
+        }
+    };
+
+
+    const fetchAnnotations = async (date) => {
+        try {
+            const data = await fetchAnnotationsByDate(date);
+
+            // Formatar os dados das anotações
+            const formattedData = data.map((item, index) => ({
+                id: item.id,
+                cause: item.cause,
+                stressLevel: item.stressLevel,
+                timeRange: `${new Date(item.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${new Date(item.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+                color: colors[item.stressLevel] || 'grey',
+            }));
+
+            setAnnotations(formattedData || []);
+            // Calcular o maior nível de estresse para marcar o dot
+            if (formattedData.length > 0) {
+                const maxStressLevel = Math.max(...formattedData.map(item => item.stressLevel));
+                const dotColor = colors[maxStressLevel] || 'grey';
+
+                // Atualizar o calendário com o dot
+                setCalendarMarks((prevMarks) => ({
+                    ...prevMarks,
+                    [date]: {
+                        marked: true,
+                        dots: [{ color: dotColor }],
+                    },
+                }));
+            } else {
+                // Remove o dot se não houver anotações para a data
+                setCalendarMarks((prevMarks) => {
+                    const updatedMarks = { ...prevMarks };
+                    delete updatedMarks[date];
+                    return updatedMarks;
+                });
+            }
+        } catch (error) {
+            console.error(error);
+            setAnnotations([]);
+            Alert.alert('Erro', 'Não foi possível carregar as anotações.');
+        }
+    };
 
 
     const handleDayPress = (day) => {
         setSelectedDate(day.dateString);
+        fetchAnnotations(day.dateString);
     };
 
-    const openModal = () => setModalVisible(true);
-
-    const saveAnnotation = () => {
-        if (!selectedCause) {
-            alert("Por favor, selecione uma causa para a anotação.");
+    const saveAnnotationToServer = async () => {
+        if (!selectedCause || stressLevel === undefined || !startTime || !endTime) {
+            Alert.alert('Erro', 'Todos os campos são obrigatórios.');
             return;
         }
 
-        const newAnnotation = {
-            id: new Date().getTime(),
+        const annotation = {
+            date: selectedDate,
             cause: selectedCause,
             stressLevel,
-            timeRange: `${startTime.getHours()}:${startTime.getMinutes()} - ${endTime.getHours()}:${endTime.getMinutes()}`,
-            color: colors[stressLevel],  // Cor associada ao stressLevel
+            startTime: startTime.toISOString(),
+            endTime: endTime.toISOString(),
         };
 
-        // Atualiza as anotações
-        setAnnotations((prevAnnotations) => {
-            const existingAnnotations = prevAnnotations[selectedDate]?.annotations || [];
-            const allAnnotations = [...existingAnnotations, newAnnotation];
-
-            // Encontra o maior nível de estresse entre todas as anotações
-            const maxStressLevel = Math.max(...allAnnotations.map((annotation) => annotation.stressLevel));
-            const maxStressColor = colors[maxStressLevel];
-
-            // Define o dot do maior grau de estresse
-            return {
-                ...prevAnnotations,
-                [selectedDate]: {
-                    marked: true,
-                    dots: [{ color: maxStressColor }],
-                    annotations: allAnnotations,
-                },
-            };
-        });
-
-        setModalVisible(false);
-        resetModalState();
-    };
-
-
-
-
-    const resetModalState = () => {
-        setSelectedCause('');
-        setStressLevel(0);
-        setStartTime(new Date());
-        setEndTime(new Date());
+        try {
+            await saveAnnotation(annotation);
+            Alert.alert('Sucesso', 'Anotação salva com sucesso!');
+            setModalVisible(false);
+            fetchAnnotations(selectedDate);
+        } catch (error) {
+            console.error(error);
+            Alert.alert('Erro', 'Não foi possível salvar a anotação.');
+        }
     };
 
     return (
@@ -87,18 +150,20 @@ export default function CalendarScreen({ navigation }) {
                 annotations={annotations}
                 selectedDate={selectedDate}
                 handleDayPress={handleDayPress}
+                markedDates={calendarMarks}
             />
 
-            <AnnotationList annotations={annotations[selectedDate]?.annotations || []} selectedDate={selectedDate} />
+
+            <AnnotationList annotations={annotations} selectedDate={selectedDate} />
 
             <View style={styles.addAnnotationContainer}>
-                <Button buttonStyle={styles.addAnnotation} titleStyle={styles.addAnnotationText} title="Adicionar Anotação" onPress={openModal} />
+                <Button buttonStyle={styles.addAnnotation} titleStyle={styles.addAnnotationText} title="Adicionar Anotação" onPress={() => setModalVisible(true)} />
             </View>
 
             <AnnotationModal
                 modalVisible={modalVisible}
                 setModalVisible={setModalVisible}
-                saveAnnotation={saveAnnotation}
+                saveAnnotation={saveAnnotationToServer}
                 selectedCause={selectedCause}
                 setSelectedCause={setSelectedCause}
                 stressLevel={stressLevel}
@@ -126,12 +191,10 @@ const styles = StyleSheet.create({
         marginBottom: 14,
         marginTop: 5,
         alignItems: 'center',
-
     },
     addAnnotation: {
         borderRadius: 20,
         paddingVertical: 10,
         paddingHorizontal: 70,
     },
-
 });

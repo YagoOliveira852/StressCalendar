@@ -1,26 +1,14 @@
 import React from 'react';
 import { View, Text, StyleSheet, FlatList } from 'react-native';
 
-export default function AnnotationList({ annotations, selectedDate }) {
-    const formatTimeRange = (timeRange) => {
-        const [start, end] = timeRange.split(" - ");
-        const formatTime = (time) => {
-            const [hour, minute] = time.split(":");
-            return `${hour.padStart(2, "0")}:${minute.padStart(2, "0")}`;
-        };
-        return `${formatTime(start)} - ${formatTime(end)}`;
-    };
-
+export default function AnnotationList({ annotations }) {
     const renderAnnotationItem = ({ item }) => (
         <View style={styles.annotationItemContainer}>
-            {/* Barra colorida */}
             <View style={[styles.annotationBar, { backgroundColor: item.color }]} />
-
-            {/* Conteúdo da anotação */}
             <View style={styles.annotationContent}>
                 <Text>Causa: {item.cause}</Text>
                 <Text>Grau de Estresse: {item.stressLevel}</Text>
-                <Text>Horário: {formatTimeRange(item.timeRange)}</Text>
+                <Text>Horário: {item.timeRange}</Text>
             </View>
         </View>
     );
@@ -45,7 +33,7 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
     },
     annotationBar: {
-        width: 10,  // Largura da barra colorida
+        width: 10,
     },
     annotationContent: {
         flex: 1,
@@ -56,4 +44,3 @@ const styles = StyleSheet.create({
         color: '#888',
     },
 });
-
