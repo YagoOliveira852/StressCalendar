@@ -30,3 +30,8 @@ export const getAnnotationsByDate = async (date) => {
   const result = await fetchQuery(query, [date]);
   return result;
 };
+
+export const deleteAnnotation = async (id) => {
+  const query = `DELETE FROM annotations WHERE id = ?;`;
+  await executeQuery(query, [id]);
+};

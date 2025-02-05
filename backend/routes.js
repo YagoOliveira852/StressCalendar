@@ -1,5 +1,5 @@
 import express from 'express';
-import { saveAnnotation, getAllAnnotations, getAnnotationsByDate } from './controllers.js';
+import { saveAnnotation, getAllAnnotations, getAnnotationsByDate, deleteAnnotation } from './controllers.js';
 
 const router = express.Router();
 
@@ -42,6 +42,21 @@ router.get('/annotations/by-date', async (req, res) => {
         res.status(200).send(annotations || []); // Garante uma resposta consistente
     } catch (error) {
         res.status(500).send({ error: 'Error fetching annotations' });
+    }
+});
+
+router.delete('/annotations/:id', async (req, res) => {
+    const { id } = req.params;
+
+    if (!id) {
+        return res.status(400).send({ error: 'ID da anotação é obrigatório' });
+    }
+
+    try {
+        await deleteAnnotation(id);
+        res.status(200).send({ message: 'Anotação deletada com sucesso' });
+    } catch (error) {
+        res.status(500).send({ error: 'Erro ao deletar a anotação' });
     }
 });
 

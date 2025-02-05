@@ -59,3 +59,18 @@ export const fetchAllAnnotations = async () => {
         return [];
     }
 };
+
+export const deleteAnnotation = async (id) => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/annotations/${id}`, {
+            method: 'DELETE',
+        });
+        if (!response.ok) {
+            throw new Error('Erro ao deletar anotação');
+        }
+        return response.json();
+    } catch (error) {
+        console.error(error);
+        throw new Error('Erro ao conectar com o servidor');
+    }
+};

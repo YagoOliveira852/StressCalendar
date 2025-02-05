@@ -154,7 +154,8 @@ export default function CalendarScreen() {
             />
 
 
-            <AnnotationList annotations={annotations} selectedDate={selectedDate} />
+            <AnnotationList annotations={annotations} selectedDate={selectedDate} fetchAnnotations={fetchAnnotations} />
+
 
             <View style={styles.addAnnotationContainer}>
                 <Button buttonStyle={styles.addAnnotation} titleStyle={styles.addAnnotationText} title="Adicionar Anotação" onPress={() => setModalVisible(true)} />
