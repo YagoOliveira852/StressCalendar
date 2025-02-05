@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
 import { deleteAnnotation } from '../services/api';
 
-export default function AnnotationList({ annotations, selectedDate, fetchAnnotations }) {
+export default function AnnotationList({ annotations, selectedDate, fetchAnnotations, onEdit }) {
     const handleDelete = async (id) => {
         Alert.alert(
             "Confirmar Exclusão",
@@ -33,7 +33,15 @@ export default function AnnotationList({ annotations, selectedDate, fetchAnnotat
                 <Text>Grau de Estresse: {item.stressLevel}</Text>
                 <Text>Horário: {item.timeRange}</Text>
             </View>
-            <View style={styles.deleteButtonContainer}>
+            <View style={styles.ButtonContainer}>
+                <TouchableOpacity
+                    style={styles.editButton}
+                    onPress={() => onEdit(item)}  // Aciona o modal de edição
+                >
+                    <Text style={styles.buttonText}>Editar </Text>
+                </TouchableOpacity>
+            </View>
+            <View style={styles.ButtonContainer}>
                 <TouchableOpacity
                     style={styles.deleteButton}
                     onPress={() => handleDelete(item.id)}
@@ -71,17 +79,30 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingLeft: 10,
     },
-    deleteButtonContainer: {
+    ButtonContainer: {
+        flexDirection: 'row',
         alignItems: 'flex-end',
-        margin: 10,
+        margin: 5,
+    },
+    editButton: {
+        backgroundColor: '#1684E1',
+        padding: 5,
+        paddingHorizontal: 10,
+        borderRadius: 20,
+        alignSelf: 'center',
+        marginTop: 5,
     },
     deleteButton: {
         backgroundColor: '#db3b4d',
         padding: 5,
         paddingHorizontal: 10,
         borderRadius: 20,
-        alignSelf: 'flex-start',
+        alignSelf: 'center',
         marginTop: 5,
+    },
+    buttonText: {
+        color: '#fff',
+        fontWeight: 'bold',
     },
     deleteButtonText: {
         color: '#fff',

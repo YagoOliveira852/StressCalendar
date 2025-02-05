@@ -1,5 +1,5 @@
 import express from 'express';
-import { saveAnnotation, getAllAnnotations, getAnnotationsByDate, deleteAnnotation } from './controllers.js';
+import { saveAnnotation, getAllAnnotations, getAnnotationsByDate, deleteAnnotation, updateAnnotation } from './controllers.js';
 
 const router = express.Router();
 
@@ -57,6 +57,22 @@ router.delete('/annotations/:id', async (req, res) => {
         res.status(200).send({ message: 'Anotação deletada com sucesso' });
     } catch (error) {
         res.status(500).send({ error: 'Erro ao deletar a anotação' });
+    }
+});
+
+router.put('/annotations/:id', async (req, res) => {
+    const { id } = req.params;
+    const { date, cause, stressLevel, startTime, endTime } = req.body;
+
+    if (!date || !cause || stressLevel === undefined || !startTime || !endTime) {
+        return res.status(400).send({ error: 'Todos os campos são obrigatórios' });
+    }
+
+    try {
+        await updateAnnotation(id, req.body);
+        res.status(200).send({ message: 'Anotação atualizada com sucesso' });
+    } catch (error) {
+        res.status(500).send({ error: 'Erro ao atualizar anotação' });
     }
 });
 

@@ -35,3 +35,13 @@ export const deleteAnnotation = async (id) => {
   const query = `DELETE FROM annotations WHERE id = ?;`;
   await executeQuery(query, [id]);
 };
+
+export const updateAnnotation = async (id, updatedAnnotation) => {
+  const { date, cause, stressLevel, startTime, endTime } = updatedAnnotation;
+  const query = `
+    UPDATE annotations
+    SET date = ?, cause = ?, stressLevel = ?, startTime = ?, endTime = ?
+    WHERE id = ?;
+  `;
+  await executeQuery(query, [date, cause, stressLevel, startTime, endTime, id]);
+};

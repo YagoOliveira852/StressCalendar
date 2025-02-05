@@ -74,3 +74,23 @@ export const deleteAnnotation = async (id) => {
         throw new Error('Erro ao conectar com o servidor');
     }
 };
+
+export const updateAnnotation = async (id, updatedAnnotation) => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/annotations/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updatedAnnotation),
+        });
+        if (!response.ok) {
+            console.log(updatedAnnotation)
+            throw new Error('Erro ao atualizar anotação');
+        }
+        return response.json();
+    } catch (error) {
+        console.error(error);
+        throw new Error('Erro ao conectar com o servidor');
+    }
+};

@@ -4,12 +4,13 @@ import { Button } from 'react-native-elements';
 import CalendarComponent from '../components/CalendarComponent';
 import AnnotationModal from '../components/AnnotationModal';
 import AnnotationList from '../components/AnnotationList';
-import { fetchAllAnnotations, fetchAnnotationsByDate, saveAnnotation } from '../services/api';
+import { fetchAllAnnotations, fetchAnnotationsByDate, saveAnnotation, updateAnnotation } from '../services/api';
 
 export default function CalendarScreen() {
     const [selectedDate, setSelectedDate] = useState('');
     const [calendarMarks, setCalendarMarks] = useState({});
     const [annotations, setAnnotations] = useState([]);
+    const [editingAnnotation, setEditingAnnotation] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedCause, setSelectedCause] = useState('');
     const [stressLevel, setStressLevel] = useState(0);
@@ -144,6 +145,46 @@ export default function CalendarScreen() {
         }
     };
 
+    const saveOrUpdateAnnotation = async () => {
+        if (!selectedCause || stressLevel === undefined || !startTime || !endTime) {
+            Alert.alert('Erro', 'Todos os campos são obrigatórios.');
+            return;
+        }
+
+        // Combinar a data selecionada com os horários escolhidos
+        const combineDateTime = (date, time) => {
+            const combined = new Date(date);
+            combined.setHours(time.getHours(), time.getMinutes());
+            return combined.toISOString();
+        };
+
+
+        const annotation = {
+            date: selectedDate, // Data correta do calendário
+            cause: selectedCause,
+            stressLevel,
+            startTime: combineDateTime(selectedDate, startTime), // Correção aqui
+            endTime: combineDateTime(selectedDate, endTime),     // Correção aqui
+        };
+
+        try {
+            if (editingAnnotation) {
+                await updateAnnotation(editingAnnotation.id, annotation);
+                Alert.alert('Sucesso', 'Anotação atualizada com sucesso!');
+            } else {
+                await saveAnnotation(annotation);
+                Alert.alert('Sucesso', 'Anotação salva com sucesso!');
+            }
+            setModalVisible(false);
+            fetchAnnotations(selectedDate);
+            setEditingAnnotation(null);
+        } catch (error) {
+            console.error(error);
+            Alert.alert('Erro', 'Não foi possível salvar a anotação.');
+        }
+    };
+
+
     return (
         <View style={styles.container}>
             <CalendarComponent
@@ -154,17 +195,37 @@ export default function CalendarScreen() {
             />
 
 
-            <AnnotationList annotations={annotations} selectedDate={selectedDate} fetchAnnotations={fetchAnnotations} />
+            <AnnotationList
+                annotations={annotations}
+                selectedDate={selectedDate}
+                fetchAnnotations={fetchAnnotations}
+                onEdit={(annotation) => {
+                    setEditingAnnotation(annotation);
+                    // setSelectedCause(annotation.cause);
+                    // setStressLevel(annotation.stressLevel);
+
+                    // const startDate = new Date(annotation.startTime);
+                    // const endDate = new Date(annotation.endTime);
+
+                    // // Corrigir o fuso horário aplicando o deslocamento inverso
+                    // setStartTime(new Date(startDate.getTime() + startDate.getTimezoneOffset() * 60000));
+                    // setEndTime(new Date(endDate.getTime() + endDate.getTimezoneOffset() * 60000));
+
+                    setModalVisible(true);
+                }}
+
+
+            />
 
 
             <View style={styles.addAnnotationContainer}>
-                <Button buttonStyle={styles.addAnnotation} titleStyle={styles.addAnnotationText} title="Adicionar Anotação" onPress={() => setModalVisible(true)} />
+                <Button buttonStyle={styles.addAnnotation} titleStyle={styles.addAnnotationText} title="Adicionar Anotação" onPress={() => { setModalVisible(true); setEditingAnnotation(null); }} />
             </View>
 
             <AnnotationModal
                 modalVisible={modalVisible}
                 setModalVisible={setModalVisible}
-                saveAnnotation={saveAnnotationToServer}
+                saveAnnotation={saveOrUpdateAnnotation}
                 selectedCause={selectedCause}
                 setSelectedCause={setSelectedCause}
                 stressLevel={stressLevel}
@@ -178,6 +239,7 @@ export default function CalendarScreen() {
                 showEndTimePicker={showEndTimePicker}
                 setShowEndTimePicker={setShowEndTimePicker}
                 colors={colors}
+                editingAnnotation={editingAnnotation}
             />
         </View>
     );

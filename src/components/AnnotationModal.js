@@ -23,6 +23,7 @@ export default function AnnotationModal({
     showEndTimePicker,
     setShowEndTimePicker,
     colors,
+    editingAnnotation
 }) {
     // Debounce a função que altera o estado
     const handleStressLevelChange = useCallback(
@@ -115,7 +116,9 @@ export default function AnnotationModal({
                         />
                     )}
 
-                    <Button buttonStyle={styles.saveButton} title="Salvar Anotação" onPress={saveAnnotation} />
+
+                    <Button buttonStyle={styles.saveButton} title={editingAnnotation ? "Atualizar Anotação" : "Salvar Anotação"} onPress={saveAnnotation} />
+
                     <Button buttonStyle={styles.cancelButton} title="Cancelar" onPress={() => { setModalVisible(false); resetModalState(); }} />
                 </View>
             </ScrollView>
