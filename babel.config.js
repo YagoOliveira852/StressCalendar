@@ -1,5 +1,5 @@
 module.exports = {
-    presets: ['module:metro-react-native-babel-preset'],
+    presets: ['babel-preset-expo'],
     plugins: [
         ['module:react-native-dotenv', {
             moduleName: '@env',
@@ -9,5 +9,6 @@ module.exports = {
             safe: false,
             allowUndefined: true,
         }],
+        'react-native-reanimated/plugin'  // ✅ Este deve ser o último plugin
     ],
 };
