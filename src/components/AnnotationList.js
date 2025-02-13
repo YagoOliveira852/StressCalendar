@@ -32,7 +32,7 @@ export default function AnnotationList({ annotations, selectedDate, fetchAnnotat
                 <Text>Causa: {item.cause}</Text>
                 <Text>Grau de Estresse: {item.stressLevel}</Text>
                 <Text>Horário: {item.timeRange}</Text>
-                <Text>Descrição: {item.description || 'Sem descrição disponível'}</Text>
+                <Text>Descrição: {item.description || 'Nenhuma descrição '}</Text>
             </View>
             <View style={styles.ButtonContainer}>
                 <TouchableOpacity

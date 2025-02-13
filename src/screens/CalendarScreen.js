@@ -6,7 +6,7 @@ import AnnotationModal from '../components/AnnotationModal';
 import AnnotationList from '../components/AnnotationList';
 import { fetchAllAnnotations, fetchAnnotationsByDate, saveAnnotation, updateAnnotation } from '../services/api';
 
-export default function CalendarScreen() {
+export default function CalendarScreen({ navigation }) {
     const [selectedDate, setSelectedDate] = useState('');
     const [calendarMarks, setCalendarMarks] = useState({});
     const [annotations, setAnnotations] = useState([]);
@@ -29,6 +29,19 @@ export default function CalendarScreen() {
         fetchAnnotations(todayString);
         fetchMarks();
     }, []);
+
+    useEffect(() => {
+        // Atualiza quando a tela ganha o foco
+        const unsubscribe = navigation.addListener('focus', () => {
+            const today = new Date();
+            const todayString = today.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }).split('/').reverse().join('-');
+            setSelectedDate(todayString);
+            fetchAnnotations(todayString);
+            fetchMarks();
+        });
+
+        return unsubscribe;
+    }, [navigation]);
 
     const fetchMarks = async () => {
         try {
@@ -113,6 +126,7 @@ export default function CalendarScreen() {
                 Alert.alert('Sucesso', 'Anotação salva com sucesso!');
             }
             setModalVisible(false);
+            fetchMarks()
             fetchAnnotations(selectedDate);
             setEditingAnnotation(null);
         } catch (error) {
@@ -129,6 +143,7 @@ export default function CalendarScreen() {
                 handleDayPress={(day) => {
                     setSelectedDate(day.dateString);
                     fetchAnnotations(day.dateString);
+                    fetchMarks();
                 }}
                 markedDates={calendarMarks}
             />
@@ -137,6 +152,7 @@ export default function CalendarScreen() {
                 annotations={annotations}
                 selectedDate={selectedDate}
                 fetchAnnotations={fetchAnnotations}
+                fetchMarks={fetchMarks}
                 onEdit={(annotation) => {
                     setEditingAnnotation(annotation);
                     // setSelectedCause(annotation.cause);
@@ -149,7 +165,7 @@ export default function CalendarScreen() {
             />
 
             <View style={styles.addAnnotationContainer}>
-                <Button buttonStyle={styles.addAnnotation} titleStyle={styles.addAnnotationText} title="Adicionar Anotação" onPress={() => { setModalVisible(true); setEditingAnnotation(null); }} />
+                <Button buttonStyle={styles.addAnnotation} titleStyle={styles.addAnnotationText} title="Adicionar Anotação" onPress={() => { setModalVisible(true); setEditingAnnotation(null); setDescription(''); setSelectedCause(''); setStressLevel(0); }} />
             </View>
 
             <AnnotationModal
