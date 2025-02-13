@@ -1,5 +1,5 @@
-import React, { useCallback } from 'react';
-import { Modal, View, Text, ScrollView, StyleSheet, Dimensions } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { Modal, View, Text, ScrollView, StyleSheet, Dimensions, TextInput } from 'react-native';
 import { Button } from "react-native-elements";
 import RNPickerSelect from 'react-native-picker-select';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -18,6 +18,8 @@ export default function AnnotationModal({
     setStartTime,
     endTime,
     setEndTime,
+    description,
+    setDescription,
     showStartTimePicker,
     setShowStartTimePicker,
     showEndTimePicker,
@@ -38,6 +40,7 @@ export default function AnnotationModal({
         setStressLevel(0);
         setStartTime(new Date());
         setEndTime(new Date());
+        setDescription('');
     };
 
     return (
@@ -72,9 +75,7 @@ export default function AnnotationModal({
                             thumbTintColor={colors[stressLevel]}
                         />
                         <View style={styles.stressLevelInfo}>
-                            <Text style={[styles.stressLevelText, { color: colors[stressLevel] }]}>
-                                Nível de Estresse: {stressLevel}
-                            </Text>
+                            <Text style={[styles.stressLevelText, { color: colors[stressLevel] }]}>Nível de Estresse: {stressLevel}</Text>
                         </View>
                     </View>
 
@@ -116,9 +117,19 @@ export default function AnnotationModal({
                         />
                     )}
 
+                    <Text>Descrição:</Text>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Digite a descrição da anotação"
+                        multiline={true}
+                        numberOfLines={4}
+                        onChangeText={setDescription}
+                        value={description}
+                        maxLength={100}
+                    />
+                    <Text style={styles.charCount}>{description.length}/100</Text>
 
                     <Button buttonStyle={styles.saveButton} title={editingAnnotation ? "Atualizar Anotação" : "Salvar Anotação"} onPress={saveAnnotation} />
-
                     <Button buttonStyle={styles.cancelButton} title="Cancelar" onPress={() => { setModalVisible(false); resetModalState(); }} />
                 </View>
             </ScrollView>
@@ -147,15 +158,9 @@ const styles = StyleSheet.create({
     modalContainer: {
         flex: 1,
         justifyContent: 'center',
-        // alignItems: 'center',
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
     modalContent: {
-        // backgroundColor: 'white',
-        // padding: 20,
-        // width: '80%',
-        // borderRadius: 10,
-        // alignItems: 'center',
         backgroundColor: "white",
         padding: 20,
         marginHorizontal: 20,
@@ -191,9 +196,22 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
     },
     timerButton: {
-        // backgroundColor: "#87CEFA",
         width: 120,
         height: 60,
+    },
+    input: {
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 4,
+        padding: 10,
+        marginVertical: 8,
+        textAlignVertical: 'top',
+    },
+    charCount: {
+        textAlign: 'right',
+        color: '#888',
+        fontSize: 12,
+        marginTop: 4,
     },
     saveButton: {
         backgroundColor: "#5cdb5c",

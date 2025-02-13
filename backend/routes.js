@@ -5,9 +5,9 @@ const router = express.Router();
 
 // Endpoint para salvar uma anotação
 router.post('/annotations', async (req, res) => {
-    const { date, cause, stressLevel, startTime, endTime } = req.body;
+    const { date, cause, stressLevel, startTime, endTime, description } = req.body;
 
-    if (!date || !cause || stressLevel === undefined || !startTime || !endTime) {
+    if (!date || !cause || stressLevel === undefined || !startTime || !endTime || !description) {
         return res.status(400).send({ error: 'Todos os campos são obrigatórios' });
     }
 

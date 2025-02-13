@@ -16,9 +16,9 @@ export default function CalendarScreen() {
     const [stressLevel, setStressLevel] = useState(0);
     const [startTime, setStartTime] = useState(new Date());
     const [endTime, setEndTime] = useState(new Date());
+    const [description, setDescription] = useState('');
     const [showStartTimePicker, setShowStartTimePicker] = useState(false);
     const [showEndTimePicker, setShowEndTimePicker] = useState(false);
-
 
     const colors = ['green', 'lime', 'orange', 'red', 'maroon'];
 
@@ -42,71 +42,40 @@ export default function CalendarScreen() {
             }
 
             const marks = {};
-
             data.forEach((item) => {
-
                 const stressLevel = item.stressLevel;
-                // Validações para evitar campos undefined
                 if (!item.date || !item.startTime || !item.endTime) {
                     console.warn("Anotação inválida encontrada:", item);
-                    return; // Ignora anotações inválidas
+                    return;
                 }
-
-                // Calcular o maior nível de estresse para a data
                 if (!marks[item.date] || stressLevel > marks[item.date].maxStressLevel) {
                     marks[item.date] = {
                         maxStressLevel: stressLevel,
-                        dots: [{ color: colors[stressLevel] || 'grey' }], // Apenas o maior nível de estresse
+                        dots: [{ color: colors[stressLevel] || 'grey' }],
                     };
                 }
             });
 
-            const finalMarks = marks;
-            setCalendarMarks(finalMarks);
-
+            setCalendarMarks(marks);
         } catch (error) {
             console.error(error);
             setAnnotations([]);
             Alert.alert('Erro', 'Não foi possível carregar as anotações.');
         }
     };
-
 
     const fetchAnnotations = async (date) => {
         try {
             const data = await fetchAnnotationsByDate(date);
-
-            // Formatar os dados das anotações
-            const formattedData = data.map((item, index) => ({
+            const formattedData = data.map((item) => ({
                 id: item.id,
                 cause: item.cause,
                 stressLevel: item.stressLevel,
                 timeRange: `${new Date(item.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${new Date(item.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+                description: item.description,
                 color: colors[item.stressLevel] || 'grey',
             }));
-
             setAnnotations(formattedData || []);
-            // Calcular o maior nível de estresse para marcar o dot
-            if (formattedData.length > 0) {
-                const maxStressLevel = Math.max(...formattedData.map(item => item.stressLevel));
-                const dotColor = colors[maxStressLevel] || 'grey';
-
-                // Atualizar o calendário com o dot
-                setCalendarMarks((prevMarks) => ({
-                    ...prevMarks,
-                    [date]: {
-                        marked: true,
-                        dots: [{ color: dotColor }],
-                    },
-                }));
-            } else {
-                // Remove o dot se não houver anotações para a data
-                setCalendarMarks((prevMarks) => {
-                    const updatedMarks = { ...prevMarks };
-                    delete updatedMarks[date];
-                    return updatedMarks;
-                });
-            }
         } catch (error) {
             console.error(error);
             setAnnotations([]);
@@ -114,57 +83,25 @@ export default function CalendarScreen() {
         }
     };
 
-
-    const handleDayPress = (day) => {
-        setSelectedDate(day.dateString);
-        fetchAnnotations(day.dateString);
-    };
-
-    const saveAnnotationToServer = async () => {
-        if (!selectedCause || stressLevel === undefined || !startTime || !endTime) {
-            Alert.alert('Erro', 'Todos os campos são obrigatórios.');
-            return;
-        }
-
-        const annotation = {
-            date: selectedDate,
-            cause: selectedCause,
-            stressLevel,
-            startTime: startTime.toISOString(),
-            endTime: endTime.toISOString(),
-        };
-
-        try {
-            await saveAnnotation(annotation);
-            Alert.alert('Sucesso', 'Anotação salva com sucesso!');
-            setModalVisible(false);
-            fetchAnnotations(selectedDate);
-        } catch (error) {
-            console.error(error);
-            Alert.alert('Erro', 'Não foi possível salvar a anotação.');
-        }
-    };
-
     const saveOrUpdateAnnotation = async () => {
-        if (!selectedCause || stressLevel === undefined || !startTime || !endTime) {
+        if (!selectedCause || stressLevel === undefined || !startTime || !endTime || !description) {
             Alert.alert('Erro', 'Todos os campos são obrigatórios.');
             return;
         }
 
-        // Combinar a data selecionada com os horários escolhidos
         const combineDateTime = (date, time) => {
             const combined = new Date(date);
             combined.setHours(time.getHours(), time.getMinutes());
             return combined.toISOString();
         };
 
-
         const annotation = {
-            date: selectedDate, // Data correta do calendário
+            date: selectedDate,
             cause: selectedCause,
             stressLevel,
-            startTime: combineDateTime(selectedDate, startTime), // Correção aqui
-            endTime: combineDateTime(selectedDate, endTime),     // Correção aqui
+            startTime: combineDateTime(selectedDate, startTime),
+            endTime: combineDateTime(selectedDate, endTime),
+            description,
         };
 
         try {
@@ -184,16 +121,17 @@ export default function CalendarScreen() {
         }
     };
 
-
     return (
         <View style={styles.container}>
             <CalendarComponent
                 annotations={annotations}
                 selectedDate={selectedDate}
-                handleDayPress={handleDayPress}
+                handleDayPress={(day) => {
+                    setSelectedDate(day.dateString);
+                    fetchAnnotations(day.dateString);
+                }}
                 markedDates={calendarMarks}
             />
-
 
             <AnnotationList
                 annotations={annotations}
@@ -203,20 +141,12 @@ export default function CalendarScreen() {
                     setEditingAnnotation(annotation);
                     // setSelectedCause(annotation.cause);
                     // setStressLevel(annotation.stressLevel);
-
-                    // const startDate = new Date(annotation.startTime);
-                    // const endDate = new Date(annotation.endTime);
-
-                    // // Corrigir o fuso horário aplicando o deslocamento inverso
-                    // setStartTime(new Date(startDate.getTime() + startDate.getTimezoneOffset() * 60000));
-                    // setEndTime(new Date(endDate.getTime() + endDate.getTimezoneOffset() * 60000));
-
+                    // setStartTime(new Date(annotation.startTime));
+                    // setEndTime(new Date(annotation.endTime));
+                    // setDescription(annotation.description);
                     setModalVisible(true);
                 }}
-
-
             />
-
 
             <View style={styles.addAnnotationContainer}>
                 <Button buttonStyle={styles.addAnnotation} titleStyle={styles.addAnnotationText} title="Adicionar Anotação" onPress={() => { setModalVisible(true); setEditingAnnotation(null); }} />
@@ -234,6 +164,8 @@ export default function CalendarScreen() {
                 setStartTime={setStartTime}
                 endTime={endTime}
                 setEndTime={setEndTime}
+                description={description}
+                setDescription={setDescription}
                 showStartTimePicker={showStartTimePicker}
                 setShowStartTimePicker={setShowStartTimePicker}
                 showEndTimePicker={showEndTimePicker}
@@ -259,5 +191,8 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         paddingVertical: 10,
         paddingHorizontal: 70,
+    },
+    addAnnotationText: {
+        fontSize: 16,
     },
 });

@@ -32,13 +32,14 @@ export default function AnnotationList({ annotations, selectedDate, fetchAnnotat
                 <Text>Causa: {item.cause}</Text>
                 <Text>Grau de Estresse: {item.stressLevel}</Text>
                 <Text>Horário: {item.timeRange}</Text>
+                <Text>Descrição: {item.description || 'Sem descrição disponível'}</Text>
             </View>
             <View style={styles.ButtonContainer}>
                 <TouchableOpacity
                     style={styles.editButton}
-                    onPress={() => onEdit(item)}  // Aciona o modal de edição
+                    onPress={() => onEdit(item)}
                 >
-                    <Text style={styles.buttonText}>Editar </Text>
+                    <Text style={styles.buttonText}>Editar</Text>
                 </TouchableOpacity>
             </View>
             <View style={styles.ButtonContainer}>
@@ -78,6 +79,7 @@ const styles = StyleSheet.create({
     annotationContent: {
         flex: 1,
         paddingLeft: 10,
+        paddingBottom: 5,
     },
     ButtonContainer: {
         flexDirection: 'row',

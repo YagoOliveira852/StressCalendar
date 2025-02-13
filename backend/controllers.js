@@ -2,17 +2,17 @@ import { executeQuery, fetchQuery } from './database.js';
 
 // Salvar uma nova anotação
 export const saveAnnotation = async (annotation) => {
-  const { date, cause, stressLevel, startTime, endTime } = annotation;
+  const { date, cause, stressLevel, startTime, endTime, description } = annotation;
   const query = `
-    INSERT INTO annotations (date, cause, stressLevel, startTime, endTime)
-    VALUES (?, ?, ?, ?, ?);
+    INSERT INTO annotations (date, cause, stressLevel, startTime, endTime, description)
+    VALUES (?, ?, ?, ?, ?, ?);
   `;
-  await executeQuery(query, [date, cause, stressLevel, startTime, endTime]);
+  await executeQuery(query, [date, cause, stressLevel, startTime, endTime, description]);
 };
 
 export const getAllAnnotations = async () => {
   const query = `
-    SELECT id, date, cause, stressLevel, startTime, endTime
+    SELECT id, date, cause, stressLevel, startTime, endTime , description
     FROM annotations
     ORDER BY date DESC;
   `;
@@ -22,7 +22,7 @@ export const getAllAnnotations = async () => {
 
 export const getAnnotationsByDate = async (date) => {
   const query = `
-  SELECT id, date, cause, stressLevel, startTime, endTime
+  SELECT id, date, cause, stressLevel, startTime, endTime, description
   FROM annotations
   WHERE date = ?
   ORDER BY startTime ASC;
@@ -37,11 +37,12 @@ export const deleteAnnotation = async (id) => {
 };
 
 export const updateAnnotation = async (id, updatedAnnotation) => {
-  const { date, cause, stressLevel, startTime, endTime } = updatedAnnotation;
+  const { date, cause, stressLevel, startTime, endTime, description } = updatedAnnotation;
   const query = `
     UPDATE annotations
-    SET date = ?, cause = ?, stressLevel = ?, startTime = ?, endTime = ?
+    SET date = ?, cause = ?, stressLevel = ?, startTime = ?, endTime = ?, description = ?
     WHERE id = ?;
   `;
-  await executeQuery(query, [date, cause, stressLevel, startTime, endTime, id]);
+  await executeQuery(query, [date, cause, stressLevel, startTime, endTime, description, id]);
 };
+
