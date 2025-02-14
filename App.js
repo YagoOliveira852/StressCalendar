@@ -1,6 +1,7 @@
 import React from "react";
 import CalendarScreen from "./src/screens/CalendarScreen";
 import AnnotationScreen from "./src/screens/AnnotationScreen";
+import GraphScreen from "./src/screens/GraphScreen";
 import AnnotationDetails from "./src/screens/AnnotationDetails";
 
 import { NavigationContainer } from '@react-navigation/native';
@@ -41,6 +42,7 @@ export default function App() {
 			>
 				<Drawer.Screen name="Calendário" component={StackNavigator} />
 				<Drawer.Screen name="Anotações" component={AnnotationStackNavigator} />
+				<Drawer.Screen name="Gráficos" component={GraphScreen} />
 			</Drawer.Navigator>
 		</NavigationContainer>
 	);
