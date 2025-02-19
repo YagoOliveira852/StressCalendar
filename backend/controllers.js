@@ -46,3 +46,12 @@ export const updateAnnotation = async (id, updatedAnnotation) => {
   await executeQuery(query, [date, cause, stressLevel, startTime, endTime, description, id]);
 };
 
+export const getStressData = async () => {
+  const query = `
+      SELECT timestamp, stressLevel
+      FROM stress_data
+      ORDER BY timestamp ASC;
+  `;
+  return await fetchQuery(query);
+};
+

@@ -21,6 +21,15 @@ export const setupDatabase = async () => {
       );
   `);
 
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS stress_data (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        timestamp TEXT,
+        stressLevel INTEGER
+    );
+`);
+
+
   return db;
 };
 

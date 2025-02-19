@@ -94,3 +94,19 @@ export const updateAnnotation = async (id, updatedAnnotation) => {
         throw new Error('Erro ao conectar com o servidor');
     }
 };
+
+export const fetchStressData = async () => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/stress-data`);
+        if (!response.ok) throw new Error('Erro ao buscar dados de estresse');
+
+        const data = await response.json();
+        return data.map(entry => ({
+            timestamp: new Date(entry.timestamp),
+            stressLevel: parseInt(entry.stressLevel, 10),
+        }));
+    } catch (error) {
+        console.error('Erro ao carregar os dados:', error);
+        return [];
+    }
+};

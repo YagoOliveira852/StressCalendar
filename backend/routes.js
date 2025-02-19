@@ -1,5 +1,5 @@
 import express from 'express';
-import { saveAnnotation, getAllAnnotations, getAnnotationsByDate, deleteAnnotation, updateAnnotation } from './controllers.js';
+import { saveAnnotation, getAllAnnotations, getAnnotationsByDate, deleteAnnotation, updateAnnotation, getStressData } from './controllers.js';
 
 const router = express.Router();
 
@@ -77,5 +77,13 @@ router.put('/annotations/:id', async (req, res) => {
 });
 
 
+router.get('/stress-data', async (req, res) => {
+    try {
+        const stressData = await getStressData();
+        res.status(200).send(stressData);
+    } catch (error) {
+        res.status(500).send({ error: 'Erro ao buscar dados de estresse' });
+    }
+});
 
 export default router;
