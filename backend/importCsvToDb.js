@@ -9,7 +9,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Definir caminho correto do CSV (dentro da pasta 'assets')
-const csvFilePath = path.join(__dirname, '../assets/Estresse-Joao.csv');
+const csvFilePath = path.join(__dirname, '../assets/Estresse-Ricardo.csv');
 
 // Função para importar o CSV para o banco de dados
 const importCSV = async () => {

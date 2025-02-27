@@ -54,7 +54,7 @@ export default function SmartwatchScreen({ navigation }) {
 
     return (
         <ScrollView style={styles.container}>
-            <Text style={styles.title}>Estresse capturado no Smartwatch</Text>
+            <Text style={styles.title}>Estresse capturado no Smartwatch - Cenário 2</Text>
 
             {stressData.length > 0 ? (
                 <View style={{ marginRight: 20 }}>
